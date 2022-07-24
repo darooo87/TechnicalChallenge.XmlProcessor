@@ -4,7 +4,7 @@ using TechnicalChallenge.Serializers.ReferenceData.Interfaces;
 
 namespace TechnicalChallenge.XmlProcessor.Interfaces;
 
-internal interface IDataProcessor
+public interface IDataProcessor
 {
     public IGeneratorTotal[] GetReportTotals(IGenerationReport generationReport, IReferenceData referenceData);
 

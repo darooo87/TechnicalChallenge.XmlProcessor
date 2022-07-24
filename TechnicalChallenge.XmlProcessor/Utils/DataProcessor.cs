@@ -6,7 +6,7 @@ using TechnicalChallenge.XmlProcessor.Interfaces;
 
 namespace TechnicalChallenge.XmlProcessor.Utils
 {
-    internal class DataProcessor : IDataProcessor
+    public class DataProcessor : IDataProcessor
     {
         public IGeneratorTotal[] GetReportTotals(IGenerationReport generationReport, IReferenceData referenceData)
         {
