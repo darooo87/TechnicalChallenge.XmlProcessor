@@ -8,6 +8,7 @@ using TechnicalChallenge.Serializers.GenerationReport;
 using TechnicalChallenge.Serializers.GenerationReport.Interfaces;
 using TechnicalChallenge.Serializers.ReferenceData;
 using TechnicalChallenge.Serializers.ReferenceData.Interfaces;
+using TechnicalChallenge.XmlProcessor;
 using TechnicalChallenge.XmlProcessor.Interfaces;
 using TechnicalChallenge.XmlProcessor.Utils;
 
@@ -24,80 +25,83 @@ using IHost host = Host
         services.AddTransient<IGenerationOutputSerializer, GenerationOutputSerializer>();
         services.AddTransient<IReferenceDataSerializer, ReferenceDataSerializer>();
         services.AddTransient<IDataProcessor, DataProcessor>();
-        services.AddTransient<Application>();
+        services.AddTransient<XmlProcessor>();
     })
     .Build();
 
-host.Services.GetRequiredService<Application>().StartProgram();
+host.Services.GetRequiredService<XmlProcessor>().StartProgram();
 
-class Application
+namespace TechnicalChallenge.XmlProcessor
 {
-    private readonly IGenerationReportSerializer _generationReportSerializer;
-
-    private readonly IGenerationOutputSerializer _generationOutputSerializer;
-
-    private readonly IReferenceDataSerializer _referenceDataSerializer;
-
-    private readonly IDataProcessor _dataProcessor;
-
-    private readonly IConfiguration _configuration;
-
-    private readonly ILogger<Application> _logger;
-
-    public Application(
-        IGenerationReportSerializer generationReportSerializer,
-        IGenerationOutputSerializer generationOutputSerializer,
-        IReferenceDataSerializer referenceDataSerializer,
-        IDataProcessor dataProcessor,
-        IConfiguration configuration,
-        ILogger<Application> logger)
+    public class XmlProcessor
     {
-        _generationReportSerializer = generationReportSerializer;
-        _generationOutputSerializer = generationOutputSerializer;
-        _referenceDataSerializer = referenceDataSerializer;
-        _dataProcessor = dataProcessor;
-        _configuration = configuration;
-        _logger = logger;
-    }
+        private readonly IGenerationReportSerializer _generationReportSerializer;
 
-    public void StartProgram()
-    {
-        var referenceData = _referenceDataSerializer.Deserialize("ReferenceData.xml");
+        private readonly IGenerationOutputSerializer _generationOutputSerializer;
 
-        while (true)
+        private readonly IReferenceDataSerializer _referenceDataSerializer;
+
+        private readonly IDataProcessor _dataProcessor;
+
+        private readonly IConfiguration _configuration;
+
+        private readonly ILogger<XmlProcessor> _logger;
+
+        public XmlProcessor(
+            IGenerationReportSerializer generationReportSerializer,
+            IGenerationOutputSerializer generationOutputSerializer,
+            IReferenceDataSerializer referenceDataSerializer,
+            IDataProcessor dataProcessor,
+            IConfiguration configuration,
+            ILogger<XmlProcessor> logger)
         {
-            var files = Directory.GetFiles(_configuration["AppSettings:InputFolder"], "*.xml");
+            _generationReportSerializer = generationReportSerializer;
+            _generationOutputSerializer = generationOutputSerializer;
+            _referenceDataSerializer = referenceDataSerializer;
+            _dataProcessor = dataProcessor;
+            _configuration = configuration;
+            _logger = logger;
+        }
 
-            foreach (var file in files)
+        public void StartProgram()
+        {
+            var referenceData = _referenceDataSerializer.Deserialize("ReferenceData.xml");
+
+            while (true)
             {
-                var fileInfo = new FileInfo(file);
+                var files = Directory.GetFiles(_configuration["AppSettings:InputFolder"], "*.xml");
 
-                try
+                foreach (var file in files)
                 {
-                    var generationReport = _generationReportSerializer.Deserialize(fileInfo.FullName);
+                    var fileInfo = new FileInfo(file);
 
-                    var totals = _dataProcessor.GetReportTotals(generationReport, referenceData);
-                    var maxEmissions = _dataProcessor.GetMaxDayEmissions(generationReport, referenceData);
-                    var actualHeat = _dataProcessor.GetGeneratorHeatRates(generationReport);
+                    try
+                    {
+                        var generationReport = _generationReportSerializer.Deserialize(fileInfo.FullName);
 
-                    var outputFileName = Path.GetFileNameWithoutExtension(fileInfo.FullName) + "-Result" + fileInfo.Extension;
-                    var outputPath = Path.Combine(_configuration["AppSettings:OutputFolder"], outputFileName);
+                        var totals = _dataProcessor.GetReportTotals(generationReport, referenceData);
+                        var maxEmissions = _dataProcessor.GetMaxDayEmissions(generationReport, referenceData);
+                        var actualHeat = _dataProcessor.GetGeneratorHeatRates(generationReport);
 
-                    _generationOutputSerializer.Serialize(outputPath, totals, maxEmissions, actualHeat);
+                        var outputFileName = Path.GetFileNameWithoutExtension(fileInfo.FullName) + "-Result" + fileInfo.Extension;
+                        var outputPath = Path.Combine(_configuration["AppSettings:OutputFolder"], outputFileName);
 
-                    _logger.LogDebug($"File processed {fileInfo.Name}");
-                    
-                    File.Move(fileInfo.FullName, fileInfo.FullName + ".processed");
+                        _generationOutputSerializer.Serialize(outputPath, totals, maxEmissions, actualHeat);
+
+                        _logger.LogDebug($"File processed {fileInfo.Name}");
+
+                        File.Move(fileInfo.FullName, fileInfo.FullName + ".processed");
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError($"Couldn't process file {fileInfo.Name} reason {e.Message}");
+
+                        File.Move(fileInfo.FullName, fileInfo.FullName + ".unprocessable");
+                    }
                 }
-                catch(Exception e)
-                {
-                    _logger.LogError($"Couldn't process file {fileInfo.Name} reason {e.Message}");
 
-                    File.Move(fileInfo.FullName, fileInfo.FullName + ".unprocessable");
-                }
+                Thread.Sleep(1000);
             }
-
-            Thread.Sleep(1000);
         }
     }
 }

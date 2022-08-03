@@ -1,6 +1,6 @@
 ﻿namespace TechnicalChallenge.Serializers.GenerationReport.Interfaces;
 
-public interface IGasGenerator : IGenerator, IFossilFuelGenerator
+public interface IGasGenerator : IFossilFuelGenerator
 {
     public string Location { get; set; }
 }
