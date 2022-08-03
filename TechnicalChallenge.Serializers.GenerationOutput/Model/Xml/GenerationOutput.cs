@@ -7,51 +7,11 @@
 [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = true)]
 public partial class GenerationOutput
 {
-
-    private GenerationOutputGenerator[] totalsField;
-
-    private GenerationOutputDay[] maxEmissionGeneratorsField;
-
-    private ActualHeatRate[] actualHeatRatesField;
-
-    /// <remarks/>
     [System.Xml.Serialization.XmlArrayItemAttribute("Generator", IsNullable = true)]
-    public GenerationOutputGenerator[] Totals
-    {
-        get
-        {
-            return this.totalsField;
-        }
-        set
-        {
-            this.totalsField = value;
-        }
-    }
+    public GenerationOutputGenerator[] Totals { get; set; }
 
-    /// <remarks/>
     [System.Xml.Serialization.XmlArrayItemAttribute("Day", IsNullable = true)]
-    public GenerationOutputDay[] MaxEmissionGenerators
-    {
-        get
-        {
-            return this.maxEmissionGeneratorsField;
-        }
-        set
-        {
-            this.maxEmissionGeneratorsField = value;
-        }
-    }
+    public GenerationOutputDay[] MaxEmissionGenerators { get; set; }
 
-    /// <remarks/>
-    public ActualHeatRate[] ActualHeatRates
-    {
-        get
-        {
-            return this.actualHeatRatesField;
-        }
-        set
-        {
-            this.actualHeatRatesField = value;
-        }
-    }
+    public ActualHeatRate[] ActualHeatRates { get; set; }
 }

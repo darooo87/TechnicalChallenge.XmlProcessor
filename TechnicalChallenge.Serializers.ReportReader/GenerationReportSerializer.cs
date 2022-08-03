@@ -15,8 +15,6 @@ namespace TechnicalChallenge.Serializers.GenerationReport
 
             var outputReport = new Model.GenerationReport();
 
-            //TODO: split code into smaller single responsibility methods
-
             outputReport.Coal = xmlReport.Coal
                 .Select(s => new Model.CoalGenerator
                 {

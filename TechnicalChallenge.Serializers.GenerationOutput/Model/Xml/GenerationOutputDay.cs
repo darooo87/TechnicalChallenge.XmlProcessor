@@ -6,50 +6,10 @@
 [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
 public partial class GenerationOutputDay
 {
+    public string Name { get; set; }
+    
+    public System.DateTime Date { get; set; }
 
-    private string nameField;
-
-    private System.DateTime dateField;
-
-    private decimal emissionField;
-
-    /// <remarks/>
-    public string Name
-    {
-        get
-        {
-            return this.nameField;
-        }
-        set
-        {
-            this.nameField = value;
-        }
-    }
-
-    /// <remarks/>
-    public System.DateTime Date
-    {
-        get
-        {
-            return this.dateField;
-        }
-        set
-        {
-            this.dateField = value;
-        }
-    }
-
-    /// <remarks/>
-    public decimal Emission
-    {
-        get
-        {
-            return this.emissionField;
-        }
-        set
-        {
-            this.emissionField = value;
-        }
-    }
+    public decimal Emission { get; set; }
 }
 
