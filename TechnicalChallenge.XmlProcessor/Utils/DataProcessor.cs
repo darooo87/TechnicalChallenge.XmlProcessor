@@ -10,12 +10,15 @@ namespace TechnicalChallenge.XmlProcessor.Utils
     {
         public IGeneratorTotal[] GetReportTotals(IGenerationReport generationReport, IReferenceData referenceData)
         {
+            if (generationReport == null)
+                return null;
+
             var generators = new List<IGenerator>();
 
-            generators.AddRange(generationReport.OnshoreWind);
-            generators.AddRange(generationReport.OffshoreWind);
-            generators.AddRange(generationReport.Coal);
-            generators.AddRange(generationReport.Gas);
+            generators.AddRange(generationReport.OnshoreWind ?? new IWindGenerator[0]);
+            generators.AddRange(generationReport.OffshoreWind ?? new IWindGenerator[0]);
+            generators.AddRange(generationReport.Coal ?? new ICoalGenerator[0]);
+            generators.AddRange(generationReport.Gas ?? new IGasGenerator[0]);
 
             return generators
                 .Select(s => new GeneratorTotal
